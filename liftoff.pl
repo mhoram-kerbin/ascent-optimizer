@@ -5,11 +5,11 @@ use strict;
 use Data::Dumper;
 use Math::Vector::Real;
 
-use Kerbal::Carthesianorbit;
+use Kerbal::Orbit::Cartesian;
 use Kerbal::Component;
 use Kerbal::Constants;
 use Kerbal::Engine;
-use Kerbal::Keplerorbit;
+use Kerbal::Orbit::Kepler;
 use Kerbal::Orbit;
 use Kerbal::Physics;
 use Kerbal::Planetary;
@@ -83,7 +83,7 @@ use Kerbal::Planet;
 my $k = Kerbal::Planet->kerbin;
 
 
-my $ko = Kerbal::Keplerorbit->new;
+my $ko = Kerbal::Orbit::Kepler->new;
 
 $ko->set_semi_major(310000);
 $ko->set_eccentricity(0.00311);
@@ -96,7 +96,7 @@ $ko->set_gravitational_parameter($GRAVITATIONAL_CONSTANT * $k->mass);
 
 for (my $i = 0;$i<1;$i += 1) {
     $ko->set_mean_anomaly($PI+$i);
-    my $car = $ko->get_carthesian;
+    my $car = $ko->get_cartesian;
     $car->get_kepler;
     say Dumper [$i, $car->get_kepler];
 }
@@ -105,7 +105,7 @@ for (my $i = 0;$i<1;$i += 1) {
 #say Dumper $ke;
 
 
-my $c = Kerbal::Carthesianorbit->new;
+my $c = Kerbal::Orbit::Cartesian->new;
 $c->set_gravitational_parameter($GRAVITATIONAL_CONSTANT * $k->mass);
 $c->set_p(V($k->radius, 0, 1000));
 $c->set_v(V(0, 174, 0));
@@ -113,4 +113,4 @@ $c->set_v(V(0, 174, 0));
 my $ko = $c->get_kepler;
 say Dumper $ko;
 
-say Dumper  $ko->get_carthesian($k);
+say Dumper  $ko->get_cartesian($k);

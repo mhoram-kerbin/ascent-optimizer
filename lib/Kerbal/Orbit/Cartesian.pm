@@ -1,4 +1,4 @@
-package Kerbal::Carthesianorbit;
+package Kerbal::Orbit::Cartesian;
 
 use strict;
 use feature qw(say);
@@ -9,7 +9,7 @@ use constant PI => 4 * atan2(1, 1);
 use Math::Trig qw(acos_real);
 use Math::Vector::Real;
 
-use Kerbal::Keplerorbit;
+use Kerbal::Orbit::Kepler;
 
 sub new
 {
@@ -102,7 +102,7 @@ sub get_kepler
     my $ea = $self->get_eccentric_anomaly;
     my $ma = $self->get_mean_anomaly;
 
-    my $ko = Kerbal::Keplerorbit->new;
+    my $ko = Kerbal::Orbit::Kepler->new;
     $ko->set_gravitational_parameter($self->{gravitational_parameter});
     $ko->set_eccentricity($self->get_eccentricity);
     $ko->set_semi_major($self->get_semi_major);

@@ -1,4 +1,4 @@
-package Kerbal::Keplerorbit;
+package Kerbal::Orbit::Kepler;
 
 use strict;
 use feature qw(say);
@@ -8,7 +8,7 @@ use constant PI => 4 * atan2(1, 1);
 
 use Math::Vector::Real;
 
-use Kerbal::Carthesianorbit;
+use Kerbal::Orbit::Cartesian;
 
 sub new
 {
@@ -207,18 +207,18 @@ sub _calculate_unit_vectors
 
 }
 
-sub get_carthesian
+sub get_cartesian
 {
     my $self = shift;
 
-    if (not exists $self->{_cache}->{carthesian}) {
-        $self->_calculate_carthesian;
+    if (not exists $self->{_cache}->{cartesian}) {
+        $self->_calculate_cartesian;
     }
 
-    return $self->{_cache}->{carthesian};
+    return $self->{_cache}->{cartesian};
 }
 
-sub _calculate_carthesian
+sub _calculate_cartesian
 {
     my $self = shift;
 
@@ -236,12 +236,12 @@ sub _calculate_carthesian
 
     my $uv = $self->get_unit_vectors;
 
-    my $car = Kerbal::Carthesianorbit->new;
+    my $car = Kerbal::Orbit::Cartesian->new;
     $car->set_gravitational_parameter($self->{gravitational_parameter});
     $car->set_p($uv->{P} * $o->[0]  + $uv->{Q} * $o->[1]);
     $car->set_v($uv->{P} * $oo->[0] + $uv->{Q} * $oo->[1]);
 
-    $self->{_cache}->{carthesian} = $car;
+    $self->{_cache}->{cartesian} = $car;
 }
 
 1;
