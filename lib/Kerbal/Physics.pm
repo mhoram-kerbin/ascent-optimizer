@@ -4,6 +4,8 @@ use strict;
 use Exporter 'import';
 use feature qw(say);
 
+use constant PI => 4 * atan2(1, 1);
+
 use Kerbal::Constants;
 
 our @EXPORT;
@@ -105,7 +107,7 @@ sub sidereal_velocity
     my $radius = planet_radius($planet);
     my $period = planet_rotation_period($planet);
 
-    return 2 * $radius * $PI / $period * cos($latitude);
+    return 2 * $radius * PI / $period * cos($latitude);
 
 }
 

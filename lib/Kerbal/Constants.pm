@@ -6,12 +6,11 @@ our @EXPORT;
 @EXPORT = qw(&atmospheric_height &density_at_sealevel &planet_mass
  &planet_radius &planet_rotation_period &scale_height
  &engine &tank
- $CONVERSION_FACTOR $GRAVITATIONAL_CONSTANT $ISPG $PI);
+ $CONVERSION_FACTOR $GRAVITATIONAL_CONSTANT $ISPG);
 
 our $CONVERSION_FACTOR = 1.2230948554874;
 our $GRAVITATIONAL_CONSTANT = 6.674E-11;
 our $ISPG = 9.82;
-our $PI = 3.14159265358979323846;
 
 my $atmospheric_height =
 {

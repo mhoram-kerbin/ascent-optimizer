@@ -3,6 +3,8 @@ package Kerbal::Planetary;
 use strict;
 use feature qw(say);
 
+use constant PI => 4 * atan2(1, 1);
+
 use Exporter 'import';
 our @EXPORT;
 @EXPORT = qw(orbital_speed_altitude_2_semi_major apo_peri_2_semi_major semi_major_altitude_2_orbital_speed apo_peri_2_ecc apo_semi_major_2_peri mean_2_eccentric_anomaly eccentric_2_true_anomaly true_anomaly_2_altitude);
@@ -75,7 +77,7 @@ sub semi_major_2_period
 
     my $standard_gravitational_parameter = $GRAVITATIONAL_CONSTANT * planet_mass($planet);
 
-    return 2 * $PI * sqrt($semi_major ** 3 / $standard_gravitational_parameter);
+    return 2 * PI * sqrt($semi_major ** 3 / $standard_gravitational_parameter);
 }
 
 sub tangetinal_velocity
@@ -117,7 +119,7 @@ sub mean_2_eccentric_anomaly
     my $accuracy = shift;
 
     my $i = 0;
-    my $e = $ecc > 0.8 ? $PI : $mean;
+    my $e = $ecc > 0.8 ? PI : $mean;
     my $p;
     my $temp = $e - $ecc * sin($e) - $mean;
     while (abs($temp) > $accuracy) {

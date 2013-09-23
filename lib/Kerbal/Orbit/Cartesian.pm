@@ -35,6 +35,11 @@ sub set_gravitational_parameter {
     $self->_delete_cache;
 }
 
+sub get_p {
+    my $self = shift;
+    return $self->{p}
+}
+
 sub set_p {
     my $self = shift;
     $self->{p} = shift;
@@ -340,6 +345,13 @@ sub _get_h
         $self->{_cache}->{h} = $self->{p} x $self->{v};
     }
     return $self->{_cache}->{h};
+}
+
+sub get_distance
+{
+    my $self = shift;
+
+    return abs($self->{p});
 }
 
 1;

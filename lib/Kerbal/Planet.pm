@@ -2,6 +2,8 @@ package Kerbal::Planet;
 
 use strict;
 
+use constant CONVERSION_FACTOR => 1.2230948554874;
+
 sub new
 {
     my $class = shift;
@@ -75,6 +77,38 @@ sub density_at_sealevel
 sub rotation_period
 {
     return shift->{rotation_period};
+}
+
+sub to_altitude
+{
+    my $self = shift;
+    my $distance = shift;
+    return $distance - $self->{radius};
+}
+
+sub density
+{
+    my $self = shift;
+    my $altitude = shift;
+
+    my $density = CONVERSION_FACTOR * $self->pressure($altitude);
+
+    return $density;
+}
+
+sub pressure
+{
+    my $self = shift;
+    my $altitude = shift;
+
+    if ($altitude > $self->{atmospheric_height}) {
+        return 0;
+    }
+
+    my $p0 = $self->{density_at_sealevel};
+
+    my $pressure = $p0 * exp(-$altitude / $self->{scale_height});
+    return $pressure;
 }
 
 1;

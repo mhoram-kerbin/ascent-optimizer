@@ -1,6 +1,8 @@
-package Kerbal::Ship;
+package Kerbal::Rocket;
 
 use strict;
+
+use constant DRAG_MULTIPLYER => 0.008;
 
 use Kerbal::Constants;
 use Kerbal::Physics;
@@ -26,6 +28,12 @@ sub get_stages
     return $self->{stage};
 }
 
+sub get_number_of_stages
+{
+    my $self = shift;
+    return scalar @{$self->{stage}};
+}
+
 sub get_stage
 {
     my $self = shift;
@@ -49,22 +57,22 @@ sub remove_stage
     splice @{$self->{stage}}, $index;
 }
 
-sub get_mass
+sub get_mass # in kg
 {
     my $self = shift;
     my $stage = shift;
-    my $timefraction = shift;
+    my $fraction = shift;
 
-    return $self->{stage}->[$stage]->get_mass($timefraction);
+    return $self->{stage}->[$stage]->get_mass($fraction);
 }
 
-sub get_accumulated_mass
+sub get_remaining_mass # in kg
 {
     my $self = shift;
     my $stage = shift;
-    my $timefraction = shift;
+    my $fraction = shift;
 
-    my $mass = $self->get_mass($stage, $timefraction);
+    my $mass = $self->get_mass($stage, $fraction);
     foreach (0..$stage-1)
     {
         $mass += $self->get_mass($_, 0);
@@ -76,25 +84,32 @@ sub get_fuel # in kg
 {
     my $self = shift;
     my $stage = shift;
-    my $timefraction = shift;
+    my $fraction = shift;
 
     if (defined $stage)
     {
-        return $self->{stage}->[$stage]->get_fuel($timefraction);
-    } else {
-        my $fuel = 0;
-        foreach (0..$stage-1) {
-            $fuel += $self->{stage}->[$_]->get_fuel(0);
-        }
-        $fuel += $self->{stage}->[$stage]->get_fuel($timefraction);
-        return $fuel * 90;
+        return $self->{stage}->[$stage]->get_fuel($fraction);
     }
+}
+
+sub get_remaining_fuel # in kg
+{
+    my $self = shift;
+    my $stage = shift;
+    my $fraction = shift;
+
+    my $fuel = $self->{stage}->[$stage]->get_fuel($fraction);
+    foreach (0..$stage-1) {
+        $fuel += $self->{stage}->[$_]->get_fuel(0);
+    }
+    return $fuel;
 }
 
 sub get_thrust_sum # in kN
 {
     my $self = shift;
     my $stage = shift;
+
     if (not exists $self->{thrustsum}->[$stage]) {
 
         my $thrustsum = 0;
@@ -185,8 +200,8 @@ sub get_stage_delta_v
     my $pressure = shift;
 
     my $thrust = $self->get_thrust_sum($stage);
-    my $mass_end = $self->get_accumulated_mass($stage, 1);
-    my $mass_begin = $self->get_accumulated_mass($stage, $timefraction);
+    my $mass_end = $self->get_remaining_mass($stage, 1);
+    my $mass_begin = $self->get_remaining_mass($stage, $timefraction);
     my $stage_time = $self->get_stage_time($stage, $pressure);
     my $rest_stage_time = (1 - $timefraction) * $stage_time;
     my $consumption = $self->get_fuel_consumption($stage, $pressure);
@@ -211,6 +226,22 @@ sub get_accumulated_delta_v
     }
 
     return $deltav;
+}
+
+sub get_drag_coefficient
+{
+    return 0.2; # this in an approximation
+}
+
+sub get_area # this is KSP specific
+{
+    my $self = shift;
+    my $stage = shift;
+    my $stagefraction = shift;
+
+    my $mass = $self->get_remaining_mass($stage, $stagefraction);
+
+    return DRAG_MULTIPLYER * $mass;
 }
 
 1;
