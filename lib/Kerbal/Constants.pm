@@ -90,7 +90,7 @@ my $engines = {
         thrust => 200,
         isp_1atm => 320,
         isp_vac => 370,
-        mass => 1.5,
+        mass => 1500,
         drag => 0.2,
     },
     'LV-909' => {
@@ -98,7 +98,7 @@ my $engines = {
         thrust => 50,
         isp_1atm => 300,
         isp_vac => 390,
-        mass => 0.5,
+        mass => 500,
         drag => 0.2,
     },
     'Mainsail' => {
@@ -106,7 +106,7 @@ my $engines = {
         thrust => 1500,
         isp_1atm => 280,
         isp_vac => 330,
-        mass => 6,
+        mass => 6000,
         drag => 0.2,
     },
     'Nuclear' => {
@@ -114,7 +114,7 @@ my $engines = {
         thrust => 60,
         isp_1atm => 220,
         isp_vac => 800,
-        mass => 2.25,
+        mass => 2250,
         drag => 0.2,
     },
 };
@@ -128,38 +128,38 @@ sub engine
 my $tanks = {
     'FL 100' => {
         name => 'FL-T100 Fuel Tank',
-        mass => 0.5625,
-        dry => 0.0625,
+        mass => 562.5,
+        dry => 62.5,
         drag => 0.2,
     },
     'FL 200' => {
         name => 'FL-T200 Fuel Tank',
-        mass => 1.125,
-        dry => 0.125,
+        mass => 1125,
+        dry => 125,
         drag => 0.2,
     },
     'Rocko 8' => {
         name => '8 Tank',
-        mass => 4.5,
-        dry => 0.5,
+        mass => 4500,
+        dry => 500,
         drag => 0.2,
     },
     'Rocko 16' => {
         name => '16 Tank',
-        mass => 9,
-        dry => 1,
+        mass => 9000,
+        dry => 1000,
         drag => 0.2,
     },
     'Rocko 32' => {
         name => '32 Tank',
-        mass => 18,
-        dry => 2,
+        mass => 18000,
+        dry => 2000,
         drag => 0.2,
     },
     'Rocko 64' => {
         name => 'Rockomax Jumbo-64 Fuel Tank',
-        mass => 36,
-        dry => 4,
+        mass => 36000,
+        dry => 4000,
         drag => 0.2,
     },
 };

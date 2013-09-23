@@ -86,10 +86,8 @@ sub get_fuel # in kg
     my $stage = shift;
     my $fraction = shift;
 
-    if (defined $stage)
-    {
-        return $self->{stage}->[$stage]->get_fuel($fraction);
-    }
+    return $self->{stage}->[$stage]->get_fuel($fraction);
+
 }
 
 sub get_remaining_fuel # in kg
@@ -105,7 +103,7 @@ sub get_remaining_fuel # in kg
     return $fuel;
 }
 
-sub get_thrust_sum # in kN
+sub get_thrust_sum # in N
 {
     my $self = shift;
     my $stage = shift;
@@ -148,7 +146,7 @@ sub get_average_specific_impulse # in sec
     return $self->{asi}->[$stage]->{$pressure};
 }
 
-sub get_fuel_consumption # in t / sec
+sub get_fuel_consumption # in kg / sec
 {
     my $self = shift;
     my $stage = shift;
@@ -230,6 +228,10 @@ sub get_accumulated_delta_v
 
 sub get_drag_coefficient
 {
+    my $self = shift;
+    my $stage = shift;
+    my $stagefraction = shift;
+
     return 0.2; # this in an approximation
 }
 

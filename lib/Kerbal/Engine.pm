@@ -20,11 +20,11 @@ sub new
     return bless $self, $class;
 }
 
-sub get_thrust
+sub get_thrust # in N
 {
     my $self = shift;
 
-    return $self->{thrust};
+    return $self->{thrust} * 1000;
 }
 
 sub get_mass
@@ -61,7 +61,7 @@ sub get_specific_impulse
     my $pre = $self->{isp_1atm} * $pressure +
         $self->{isp_vac} * (1 - $pressure);
 
-    return $self->{thrust} / $pre;
+    return $self->get_thrust / $pre;
 }
 
 1;

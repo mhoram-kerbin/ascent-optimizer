@@ -3,6 +3,8 @@ package Kerbal::Orbit;
 use strict;
 use feature qw(say);
 
+use Data::Dumper;
+
 use Kerbal::Constants;
 use Kerbal::Orbit::Cartesian;
 use Kerbal::Orbit::Kepler;
@@ -75,17 +77,16 @@ sub get_cartesian
     return $self->{cartesian};
 }
 
-sub apply_force
+sub apply_deltav
 {
     my $self = shift;
-    my $direction = shift;
     my $deltav = shift;
 
     my $c = $self->get_cartesian;
     $self->{kepler} = undef;
     $self->{primary} = C;
 
-
+    $c->add_deltav($deltav);
 }
 
 sub get_distance
@@ -103,14 +104,56 @@ sub get_position_vector
     return $c->get_p;
 }
 
+sub get_velocity_vector
+{
+    my $self = shift;
+
+    my $c = $self->get_cartesian;
+
+    return $c->get_v;
+}
+
 sub get_velocity
 {
     my $self = shift;
 
      my $c = $self->get_cartesian;
 
-    return abs($c->get_p);
+    return abs($c->get_v);
 }
 
+sub set_gravitational_parameter
+{
+    my $self = shift;
+    my $para = shift;
+
+    $self->{$self->{primary}}->set_gravitational_parameter($para);
+}
+
+sub forward
+{
+    my $self = shift;
+    my $time = shift;
+
+    my $c = $self->get_cartesian;
+    $self->{kepler} = undef;
+    $self->{primary} = C;
+
+    $c->forward($time);
+
+}
+
+sub forward_old
+{
+    my $self = shift;
+    my $time = shift;
+
+    my $k = $self->get_kepler;
+    $self->{cartesian} = undef;
+    $self->{primary} = K;
+
+    $k->forward($time);
+
+}
 
 1;

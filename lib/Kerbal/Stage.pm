@@ -50,7 +50,7 @@ sub remove_component
     $self->{number}--;
 }
 
-sub get_mass
+sub get_mass #in kg
 {
     my $self = shift;
     my $timefraction = shift;
@@ -63,7 +63,7 @@ sub get_mass
     return $mass;
 }
 
-sub get_fuel
+sub get_fuel # in kg
 {
     my $self = shift;
     my $timefraction = shift;
@@ -76,7 +76,7 @@ sub get_fuel
     return $fuel;
 }
 
-sub get_sum_of_thrusts
+sub get_sum_of_thrusts # in N
 {
     my $self = shift;
     my $current_stage = shift;

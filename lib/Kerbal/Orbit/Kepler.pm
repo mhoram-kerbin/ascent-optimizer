@@ -22,7 +22,7 @@ sub new
         argument_of_periapsis => 0,
         mean_anomaly => 0,
         gravitational_parameter => 0,
-        approximation_error => 1E-133,
+        approximation_error => 1E-13,
         _cache => undef,
     };
 
@@ -121,10 +121,10 @@ sub _calculate_eccentric_anomaly
         $temp = $e - $ecc * sin($e) - $mean;
         $i++;
         if ($i > 100) {
-            die 'no approximation found after 100 steps';
+            die ('no approximation found after 100 steps'.Dumper($self));
         }
     }
-    say "i = $i";
+#    say "i = $i";
     $self->{_cache}->{eccentric_anomaly} = $e;
 }
 
@@ -146,6 +146,9 @@ sub _calculate_true_anomaly
     my $ecc_anomaly = $self->get_eccentric_anomaly;
     my $ecc = $self->{eccentricity};
 
+    if ($ecc >= 1) {
+        die ("no more elipsis $ecc");
+    }
     $self->{_cache}->{true_anomaly} =
         2 * atan2(sqrt(1+$ecc)*sin($ecc_anomaly/2),
                   sqrt(1-$ecc)*cos($ecc_anomaly/2));
@@ -242,6 +245,33 @@ sub _calculate_cartesian
     $car->set_v($uv->{P} * $oo->[0] + $uv->{Q} * $oo->[1]);
 
     $self->{_cache}->{cartesian} = $car;
+}
+
+sub forward
+{
+    my $self = shift;
+    my $time = shift;
+
+#    my $delta = $time * sqrt($self->{gravitational_parameter} / ($self->{semi_major} ** 3));
+#    say "D $time $self->{gravitational_parameter} $self->{semi_major} ".$delta;
+    $self->{mean_anomaly} += $time * sqrt($self->{gravitational_parameter} / $self->{semi_major} ** 3);
+    $self->_delete_cache;
+}
+
+sub get_duration
+{
+    my $self = shift;
+
+#    say $self->{semi_major}."sm";
+    return 2 * PI * sqrt($self->{semi_major} ** 3 / $self->{gravitational_parameter});
+}
+
+sub get_apoapsis
+{
+    my $self = shift;
+
+    return $self->{semi_major} * (1 + $self->{eccentricity});
+
 }
 
 1;

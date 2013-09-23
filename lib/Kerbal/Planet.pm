@@ -2,7 +2,11 @@ package Kerbal::Planet;
 
 use strict;
 
+use constant PI => 4 * atan2(1, 1);
 use constant CONVERSION_FACTOR => 1.2230948554874;
+
+use Math::Vector::Real;
+
 
 sub new
 {
@@ -109,6 +113,38 @@ sub pressure
 
     my $pressure = $p0 * exp(-$altitude / $self->{scale_height});
     return $pressure;
+}
+
+sub to_ground_velocity
+{
+    my $self = shift;
+    my $p = shift;
+    my $v = shift;
+
+    my $long = atan2($p->[1], $p->[0]);
+
+    my $lati = atan2($p->[2], sqrt($p->[1]**2 + $p->[0]**2));
+
+    my $sv = $self->sidereal_velocity($lati, $long, abs($p));
+
+    return $v-$sv;
+
+}
+
+sub sidereal_velocity
+{
+    my $self = shift;
+    my $latitude = shift; # in radians
+    my $longitude = shift; # in radians
+    my $distance = shift; # in m
+    $distance = $self->{radius} if (not defined $distance);
+
+    my $period = $self->{rotation_period};
+
+    my $v = 2 * $distance * PI / $period * cos($latitude);
+
+    return V(-$v * sin($longitude), $v * cos($longitude), 0);
+
 }
 
 1;

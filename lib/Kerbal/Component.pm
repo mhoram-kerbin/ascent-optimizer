@@ -1,6 +1,7 @@
 package Kerbal::Component;
 
 use strict;
+use feature qw(say);
 
 sub new
 {
@@ -91,25 +92,25 @@ sub remove_tank
     splice @{$self->{tank}}, $index;
 }
 
-sub get_mass
+sub get_mass # in kg
 {
     my $self = shift;
-    my $timefraction = shift;
+    my $fraction = shift;
 
     my $mass = $self->{ballast};
 
     foreach (@{$self->{engine}}) {
         $mass += $_->get_mass;
     }
+
     foreach (@{$self->{tank}}) {
-        $mass += $_->{dry};
-        $mass += ($_->{mass} - $_{dry}) * (1 - $timefraction);
+        $mass += $_->{dry} +  ($_->{mass} - $_->{dry}) * (1 - $fraction);
     }
 
     return $mass;
 }
 
-sub get_fuel
+sub get_fuel # in kg
 {
     my $self = shift;
     my $timefraction = shift;
@@ -122,7 +123,7 @@ sub get_fuel
     return $fuel;
 }
 
-sub get_sum_of_thrusts
+sub get_sum_of_thrusts # in N
 {
     my $self = shift;
     my $current_stage = shift;

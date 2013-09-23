@@ -37,7 +37,7 @@ sub set_gravitational_parameter {
 
 sub get_p {
     my $self = shift;
-    return $self->{p}
+    return $self->{p};
 }
 
 sub set_p {
@@ -62,6 +62,11 @@ sub set_pz {
     my $self = shift;
     $self->{p}->[2] = shift;
     $self->_delete_cache;
+}
+
+sub get_v {
+    my $self = shift;
+    return $self->{v};
 }
 
 sub set_v {
@@ -307,8 +312,8 @@ sub _calculate_eccentric_anomaly
     my $theta_cos = cos($theta);
     my $e = $self->get_eccentricity;
 
+    say "X $e $theta_cos ". (1 + $e * $theta_cos);
     my $ecc = acos_real(($e + $theta_cos) / (1 + $e * $theta_cos));
-
 
     if (PI < $theta) {
         $ecc = 2 * PI - $ecc
@@ -352,6 +357,25 @@ sub get_distance
     my $self = shift;
 
     return abs($self->{p});
+}
+
+sub add_deltav
+{
+    my $self = shift;
+    my $deltav = shift;
+
+#    say Dumper $deltav;
+    $self->{v} = $self->{v} + $deltav;
+#    say Dumper $self->{v};
+    $self->_delete_cache;
+}
+
+sub forward
+{
+    my $self = shift,
+    my $time = shift;
+
+    $self->{p} += $self->{v} * $time;
 }
 
 1;
