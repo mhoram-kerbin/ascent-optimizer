@@ -326,7 +326,7 @@ sub _calculate_eccentric_anomaly
         die ("no more elipsis $e");
     }
 
-    say "X $e $theta_cos ". (1 + $e * $theta_cos);
+#    say "X $e $theta_cos ". (1 + $e * $theta_cos);
     my $ecc = acos_real(($e + $theta_cos) / (1 + $e * $theta_cos));
 
     if (pi < $theta) {
@@ -391,6 +391,59 @@ sub forward
 
     $self->{p} += $self->{v} * $time;
     $self->_delete_cache;
+}
+
+sub get_longitude
+{
+    my $self = shift;
+
+    return atan2($self->{p}->[1], $self->{p}->[0]);
+}
+
+sub get_longitude_string
+{
+    my $self = shift;
+    my $modifier = shift;
+
+    my $long = ($self->get_longitude-$modifier) / pi * 180;
+    my $mod = $long >= 0 ? 'E' : 'W';
+    $long = abs($long);
+
+    my $res = sprintf (q(%s %d°), $mod, $long);
+    $long = 60*($long-int($long));
+    $res .= sprintf (q(%d'), $long);
+    $long = 60*($long-int($long));
+    $res .= sprintf (q(%.2f''), $long);
+    return $res;
+}
+
+sub get_latitude
+{
+    my $self = shift;
+
+    return atan2($self->{p}->[2], sqrt($self->{p}->[0] ** 2 + $self->{p}->[1] ** 2));
+}
+
+sub get_latitude_string
+{
+    my $self = shift;
+    my $lat = $self->get_latitude / pi * 180;
+    my $mod = $lat >= 0 ? 'N' : 'S';
+    $lat = abs($lat);
+
+    my $res = sprintf (q(%s %d°), $mod, $lat);
+    $lat = 60*($lat-int($lat));
+    $res .= sprintf (q(%d'), $lat);
+    $lat = 60*($lat-int($lat));
+    $res .= sprintf (q(%.2f''), $lat);
+    return $res;
+}
+
+sub get_prograde
+{
+    my $self = shift;
+
+    return $self->{v}->versor;
 }
 
 1;

@@ -166,4 +166,11 @@ sub forward_old
 
 }
 
+sub get_time_to_apoapsis
+{
+    my $self = shift;
+
+    return $self->get_kepler->get_time_to_apoapsis;
+}
+
 1;

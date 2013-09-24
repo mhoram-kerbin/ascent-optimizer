@@ -3,64 +3,31 @@ package Kerbal::Constants;
 use strict;
 use Exporter 'import';
 our @EXPORT;
-@EXPORT = qw(
- &engine &tank
-  $ISPG);
+@EXPORT = qw( &tank $ISPG );
 
 our $ISPG = 9.82; # in m s^-2
 
-my $engines = {
-    'LV-T45' => {
-        name => 'LV-T45 Liquid Fuel Engine',
-        thrust => 200,
-        isp_1atm => 320,
-        isp_vac => 370,
-        mass => 1500,
-        drag => 0.2,
-    },
-    'LV-909' => {
-        name => 'LV-909 Liquid Fuel Engine',
-        thrust => 50,
-        isp_1atm => 300,
-        isp_vac => 390,
-        mass => 500,
-        drag => 0.2,
-    },
-    'Mainsail' => {
-        name => 'Rockomax "Mainsail" Liquid Engine',
-        thrust => 1500,
-        isp_1atm => 280,
-        isp_vac => 330,
-        mass => 6000,
-        drag => 0.2,
-    },
-    'Nuclear' => {
-        name => 'LV-N Atomic Rocket Engine',
-        thrust => 60,
-        isp_1atm => 220,
-        isp_vac => 800,
-        mass => 2250,
-        drag => 0.2,
-    },
-};
-
-sub engine
-{
-    my $engine = shift;
-    return $engines->{$engine};
-}
-
 my $tanks = {
+    # some dry masses are different from ingame values because in KSP
+    # these containers do not have the fitting ratio between fuel and
+    # oxygene, so some mass is left unused. We simulate this behaviour
+    # by adding a fitting mass to the dry-mass, because this
+    # implementation calculates the fuel by mass only (which fits
+    # perfectly for FL and Rocko tanks). Formula:
+    #
+    # dry = mass - mass_FL200 * min (oxygene / oxygene_FL200, fuel /
+    # fuel_FL200)
+
     'Oscar' => {
         name => 'Oscar-B Fuel Tank',
-        mass => 786.75,
-        dry => 15,
+        mass => 78.675,
+        dry => 15.03863636363636, # original value: 15,
         drag => 0.2,
     },
     'Round 8' => {
         name => 'Round-8 Toroidal Fuel Tank',
         mass => 136,
-        dry => 25,
+        dry => 25.09090909090909, # original value: 25,
         drag => 0.2,
     },
     'FL 100' => {

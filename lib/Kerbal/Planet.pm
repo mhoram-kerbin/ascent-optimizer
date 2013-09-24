@@ -212,4 +212,12 @@ sub get_gravitational_parameter
     return GRAVITATIONAL_CONSTANT * $self->{mass};
 }
 
+sub get_rotation
+{
+    my $self = shift;
+    my $time = shift;
+
+    return $time / $self->{rotation_period} * 2 * pi;
+}
+
 1;

@@ -290,4 +290,40 @@ sub get_periapsis
 
 }
 
+sub get_time_since_periapsis
+{
+    my $self = shift;
+
+    my $mean_anomaly = $self->{mean_anomaly};
+    my $period = $self->get_duration;
+
+    my $time = $self->{mean_anomaly} / (2 * pi) * $period;
+
+    return $time;
+}
+
+sub get_time_to_apoapsis
+{
+    my $self = shift;
+
+    my $time_since_periapsis = $self->get_time_since_periapsis;
+    my $period = $self->get_duration;
+
+    my $res = $period/2 - $time_since_periapsis;
+    if ($res < 0) {
+        $res += $period;
+    }
+    return $res;
+}
+
+sub get_deltav_to_circularize_at_apoapsis
+{
+    my $self = shift;
+
+    my $apo = $self->get_apoapsis;
+    my $peri = $self->get_periapsis;
+
+    return sqrt($self->{gravitational_parameter} / $apo) * (1 - sqrt(2 * $peri / ($peri + $apo)));
+}
+
 1;

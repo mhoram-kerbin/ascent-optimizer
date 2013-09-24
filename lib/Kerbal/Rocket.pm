@@ -236,4 +236,36 @@ sub get_content
     return $res;
 }
 
+sub get_time_for_deltav
+{
+    my $self = shift;
+    my $deltav = shift;
+    my $stage = shift;
+    my $fraction = shift;
+    my $pressure = shift;
+
+    my $time = 0;
+    my $expanded_deltav = 0;
+
+    while($deltav > $expanded_deltav and $stage >= 0) {
+        my $remaining_stage_deltav = $self->get_stage_delta_v($stage, $fraction, $pressure);
+        my $remaining_stage_time = $self->get_stage_time($stage, $pressure) * (1 - $fraction);
+        if ($remaining_stage_deltav + $expanded_deltav > $deltav) {
+            my $deltav_per_second = $remaining_stage_deltav / $remaining_stage_time;
+            my $needed = $deltav - $expanded_deltav;
+            my $finalization_time = $needed / $deltav_per_second;
+
+            $time += $finalization_time;
+            $expanded_deltav += $deltav_per_second * $finalization_time;
+        } else {
+            $time += $remaining_stage_time;
+            $expanded_deltav += $remaining_stage_deltav;
+        }
+        $fraction = 0;
+        $stage--;
+    }
+
+    return $time;
+}
+
 1;
