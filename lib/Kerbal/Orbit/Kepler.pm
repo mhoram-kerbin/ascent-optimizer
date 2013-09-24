@@ -4,8 +4,7 @@ use strict;
 use feature qw(say);
 use Data::Dumper;
 
-use constant PI => 4 * atan2(1, 1);
-
+use Math::Trig ':pi';
 use Math::Vector::Real;
 
 use Kerbal::Orbit::Cartesian;
@@ -15,13 +14,13 @@ sub new
     my $class = shift;
 
     my $self = {
-        eccentricity => 0,
-        semi_major => 0,
-        inclination => 0,
-        ascending_node_longitude => 0,
-        argument_of_periapsis => 0,
-        mean_anomaly => 0,
-        gravitational_parameter => 0,
+        eccentricity => 0, # dimensionless
+        semi_major => 0, # in m
+        inclination => 0, # in rad
+        ascending_node_longitude => 0, # in rad
+        argument_of_periapsis => 0, # in rad
+        mean_anomaly => 0, # in rad
+        gravitational_parameter => 0, # m^3 s^-2
         approximation_error => 1E-13,
         _cache => undef,
     };
@@ -30,6 +29,15 @@ sub new
     $self->_delete_cache;
 
     return $self;
+}
+
+sub clone
+{
+    my $self = shift;
+
+    my $new = Kerbal::Orbit::Kepler->new;
+
+    die("unimplemented");
 }
 
 sub set_gravitational_parameter
@@ -112,7 +120,7 @@ sub _calculate_eccentric_anomaly
 
     my $i = 0; # iteration counter
 
-    my $e = $ecc > 0.8 ? PI : $mean; # starting value for approximation
+    my $e = $ecc > 0.8 ? pi : $mean; # starting value for approximation
     my $prev;
     my $temp = $e - $ecc * sin($e) - $mean;
     while (abs($temp) > $self->{approximation_error}) {
@@ -263,7 +271,7 @@ sub get_duration
     my $self = shift;
 
 #    say $self->{semi_major}."sm";
-    return 2 * PI * sqrt($self->{semi_major} ** 3 / $self->{gravitational_parameter});
+    return 2 * pi * sqrt($self->{semi_major} ** 3 / $self->{gravitational_parameter});
 }
 
 sub get_apoapsis
@@ -271,6 +279,14 @@ sub get_apoapsis
     my $self = shift;
 
     return $self->{semi_major} * (1 + $self->{eccentricity});
+
+}
+
+sub get_periapsis
+{
+    my $self = shift;
+
+    return $self->{semi_major} * (1 - $self->{eccentricity});
 
 }
 

@@ -3,86 +3,11 @@ package Kerbal::Constants;
 use strict;
 use Exporter 'import';
 our @EXPORT;
-@EXPORT = qw(&atmospheric_height &density_at_sealevel &planet_mass
- &planet_radius &planet_rotation_period &scale_height
+@EXPORT = qw(
  &engine &tank
- $CONVERSION_FACTOR $GRAVITATIONAL_CONSTANT $ISPG);
+  $ISPG);
 
-our $CONVERSION_FACTOR = 1.2230948554874;
-our $GRAVITATIONAL_CONSTANT = 6.674E-11;
-our $ISPG = 9.82;
-
-my $atmospheric_height =
-{
-    KERBIN => 69077.553,
-    EVE => 96708.574,
-};
-
-sub atmospheric_height
-{
-    my $planet = shift;
-    return $atmospheric_height->{$planet};
-}
-
-my $density_at_sealevel =
-{
-    KERBIN => 1,
-    EVE => 5,
-};
-
-sub density_at_sealevel
-{
-    my $planet = shift;
-    return $density_at_sealevel->{$planet};
-}
-
-my $scale_height =
-{
-    KERBIN => 5000,
-    EVE => 7000,
-};
-
-sub scale_height
-{
-    my $planet = shift;
-    return $scale_height->{$planet};
-}
-
-my $planet_mass =
-{
-    KERBIN => 5.2915793E22,
-    EVE => 1.2244127E23,
-};
-
-sub planet_mass
-{
-    my $planet = shift;
-    return $planet_mass->{$planet};
-}
-
-my $planet_radius =
-{
-    KERBIN => 600000,
-    EVE => 700000,
-};
-
-sub planet_radius
-{
-    my $planet = shift;
-    return $planet_radius->{$planet};
-}
-
-my $planet_rotation_period =
-{
-    KERBIN => 21600,
-    EVE => 80500,
-};
-
-sub planet_rotation_period
-{
-    my $planet = shift;
-    return $planet_rotation_period->{$planet};
-}
+our $ISPG = 9.82; # in m s^-2
 
 my $engines = {
     'LV-T45' => {
@@ -126,6 +51,18 @@ sub engine
 }
 
 my $tanks = {
+    'Oscar' => {
+        name => 'Oscar-B Fuel Tank',
+        mass => 786.75,
+        dry => 15,
+        drag => 0.2,
+    },
+    'Round 8' => {
+        name => 'Round-8 Toroidal Fuel Tank',
+        mass => 136,
+        dry => 25,
+        drag => 0.2,
+    },
     'FL 100' => {
         name => 'FL-T100 Fuel Tank',
         mass => 562.5,
@@ -138,20 +75,32 @@ my $tanks = {
         dry => 125,
         drag => 0.2,
     },
+    'FL 400' => {
+        name => 'FL-T400 Fuel Tank',
+        mass => 2250,
+        dry => 250,
+        drag => 0.2,
+    },
+    'FL 800' => {
+        name => 'FL-T800 Fuel Tank',
+        mass => 4500,
+        dry => 500,
+        drag => 0.2,
+    },
     'Rocko 8' => {
-        name => '8 Tank',
+        name => 'Rockomax X200-8 Fuel Tank',
         mass => 4500,
         dry => 500,
         drag => 0.2,
     },
     'Rocko 16' => {
-        name => '16 Tank',
+        name => 'Rockomax X200-16 Fuel Tank',
         mass => 9000,
         dry => 1000,
         drag => 0.2,
     },
     'Rocko 32' => {
-        name => '32 Tank',
+        name => 'Rockomax X200-32 Fuel Tank',
         mass => 18000,
         dry => 2000,
         drag => 0.2,

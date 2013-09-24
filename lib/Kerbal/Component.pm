@@ -173,4 +173,20 @@ sub randomize
     }
 }
 
+sub get_content
+{
+    my $self = shift;
+
+    my $c = "  Ballast: $self->{ballast} kg\n";
+    foreach (@{$self->{tank}}) {
+        $c .= "  Tank $_->{name} ($_->{dry} : $_->{mass} kg)\n";
+
+    }
+
+    foreach (@{$self->{engine}}) {
+        $c .= "  Engine $_->{name} ($_->{mass} kg)\n";
+    }
+    return $c;
+}
+
 1;

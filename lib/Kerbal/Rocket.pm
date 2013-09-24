@@ -2,10 +2,9 @@ package Kerbal::Rocket;
 
 use strict;
 
-use constant DRAG_MULTIPLYER => 0.008;
+use constant AREA_CONVERSION_CONSTANT => 0.008; # in m^2 kg^-1
 
 use Kerbal::Constants;
-use Kerbal::Physics;
 
 sub new
 {
@@ -169,27 +168,6 @@ sub get_stage_time # in sec
     return $fuel / $cons;
 }
 
-sub get_twr
-{
-    my $self = shift;
-    my $stage = shift;
-    my $timefraction = shift;
-    my $planet = shift;
-
-    if (not defined $planet) {
-        $planet = 'KERBIN';
-    }
-
-    my $surface_gravitation = local_gravity($planet, 0);
-    my $local_gravitation = $surface_gravitation; # this is an approximation
-
-    my $mass = $self->get_mass($stage, $timefraction);
-    my $force = $self->get_thrust_sum($stage);
-    my $twr = $force / ($mass * $local_gravitation);
-
-    return $twr;
-}
-
 sub get_stage_delta_v
 {
     my $self = shift;
@@ -226,7 +204,7 @@ sub get_accumulated_delta_v
     return $deltav;
 }
 
-sub get_drag_coefficient
+sub get_drag_coefficient # dimensionless
 {
     my $self = shift;
     my $stage = shift;
@@ -235,15 +213,27 @@ sub get_drag_coefficient
     return 0.2; # this in an approximation
 }
 
-sub get_area # this is KSP specific
+sub get_area # in m^2 ... this is KSP specific
 {
     my $self = shift;
     my $stage = shift;
     my $stagefraction = shift;
 
-    my $mass = $self->get_remaining_mass($stage, $stagefraction);
+    return AREA_CONVERSION_CONSTANT * $self->get_remaining_mass($stage, $stagefraction);
+}
 
-    return DRAG_MULTIPLYER * $mass;
+sub get_content
+{
+    my $self = shift;
+
+    my $res = '';
+    my $stage = 0;
+    foreach (@{$self->{stage}}) {
+        $res .= "Stage $stage\n";
+        $res .= $_->get_content;
+        $stage++;
+    }
+    return $res;
 }
 
 1;

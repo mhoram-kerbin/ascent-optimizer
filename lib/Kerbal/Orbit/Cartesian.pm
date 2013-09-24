@@ -4,9 +4,7 @@ use strict;
 use feature qw(say);
 use Data::Dumper;
 
-use constant PI => 4 * atan2(1, 1);
-
-use Math::Trig qw(acos_real);
+use Math::Trig qw(acos_real :pi);
 use Math::Vector::Real;
 
 use Kerbal::Orbit::Kepler;
@@ -16,9 +14,9 @@ sub new
     my $class = shift;
 
     my $self = {
-        p => V(0,0,0),
-        v => V(0,0,0),
-        gravitational_parameter => 0,
+        p => V(0,0,0), # Vector in m
+        v => V(0,0,0), # Vector in m s^-1
+        gravitational_parameter => 0, # in m^3 s^-2
         _cache => undef,
     };
     bless $self, $class;
@@ -27,6 +25,17 @@ sub new
 
     return $self;
 
+}
+
+sub clone
+{
+    my $self = shift;
+
+    my $new = Kerbal::Orbit::Cartesian->new;
+    $new->set_p(V($self->{p}->[0], $self->{p}->[1], $self->{p}->[2]));
+    $new->set_v(V($self->{v}->[0], $self->{v}->[1], $self->{v}->[2]));
+    $new->set_gravitational_parameter($self->{gravitational_parameter});
+    return $new;
 }
 
 sub set_gravitational_parameter {
@@ -232,7 +241,7 @@ sub _calculate_ascending_node_longitude
     my $o = acos_real(V(1,0,0) * $n->versor);
 
     if ($n * V(0, 1, 0) < 0) {
-        $o = 2 * PI - $o;
+        $o = 2 * pi - $o;
     }
     $self->{_cache}->{ascending_node_longitude} = $o;
 }
@@ -264,7 +273,7 @@ sub _calculate_argument_of_periapsis
     my $o = acos_real($n * $e / (abs($n) * abs($e)));
 
     if ($e * V(0, 0, 1) < 0) {
-        $o = 2 * PI - $o;
+        $o = 2 * pi - $o;
     }
     $self->{_cache}->{argument_of_periapsis} = $o;
 }
@@ -288,7 +297,7 @@ sub _calculate_true_anomaly
     my $theta = acos_real($self->{p} * $e / (abs($self->{p}) * abs($e)));
 
     if ($self->{p} * $self->{v} < 0) {
-        $theta = 2 * PI - $theta;
+        $theta = 2 * pi - $theta;
     }
 
     $self->{_cache}->{true_anomaly} = $theta;
@@ -304,6 +313,7 @@ sub get_eccentric_anomaly
 
     return $self->{_cache}->{eccentric_anomaly};
 }
+
 sub _calculate_eccentric_anomaly
 {
     my $self = shift;
@@ -312,11 +322,15 @@ sub _calculate_eccentric_anomaly
     my $theta_cos = cos($theta);
     my $e = $self->get_eccentricity;
 
+    if ($e >= 1) {
+        die ("no more elipsis $e");
+    }
+
     say "X $e $theta_cos ". (1 + $e * $theta_cos);
     my $ecc = acos_real(($e + $theta_cos) / (1 + $e * $theta_cos));
 
-    if (PI < $theta) {
-        $ecc = 2 * PI - $ecc
+    if (pi < $theta) {
+        $ecc = 2 * pi - $ecc
     }
 
     $self->{_cache}->{eccentric_anomaly} = $ecc;
@@ -376,6 +390,7 @@ sub forward
     my $time = shift;
 
     $self->{p} += $self->{v} * $time;
+    $self->_delete_cache;
 }
 
 1;

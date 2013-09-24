@@ -4,8 +4,7 @@ use strict;
 use feature qw(say);
 use Data::Dumper;
 
-use constant PI => 4 * atan2(1, 1);
-
+use Math::Trig ':pi';
 use Math::Vector::Real;
 
 use Kerbal::Constants;
@@ -21,6 +20,7 @@ sub new
         thrust_fraction => 1,
         orientation => V(1, 0, 0),
         simulation_timepiece => 0.1,
+        orbit => undef,
     };
 
     return bless $self, $class;
@@ -61,8 +61,7 @@ sub set_planet
         die 'can not set planet before orbit';
     }
     $self->{planet} = $planet;
-    $self->{orbit}->set_gravitational_parameter(
-        $GRAVITATIONAL_CONSTANT * $planet->mass);
+    $self->{orbit}->set_gravitational_parameter($planet->get_gravitational_parameter);
 }
 
 sub get_current_force # Vector in N
@@ -79,15 +78,29 @@ sub get_current_force # Vector in N
     return $gravity_force + $drag_force + $thrust_force;
 }
 
+sub get_current_forces
+{
+    my $self = shift;
+    my $duration = shift;
+
+    return [$self->get_gravity_force, $self->get_drag_force, $self->get_thrust_force];
+}
+
+sub get_current_deltavs
+{
+    my $self = shift;
+    my $duration = shift;
+
+    return [$self->_force_2_deltav($self->get_gravity_force), $self->_force_2_deltav($self->get_drag_force), $self->_force_2_deltav($self->get_thrust_force)];
+}
+
 sub get_gravity_force # Vector in N
 {
     my $self = shift;
 
     my $p = $self->{orbit}->get_position_vector;
     my $f = $p->versor *
-        (- $GRAVITATIONAL_CONSTANT *
-         $self->{planet}->mass /
-         abs($p) ** 2 *
+        (- $self->{planet}->local_gravity(abs($p)) *
          $self->{rocket}->get_remaining_mass($self->{current_stage},
                                              $self->{stage_fraction}));
     return $f;
@@ -100,9 +113,7 @@ sub get_drag_force # Vector in N
     my $distance = $self->{orbit}->get_distance;
     my $altitude = $self->{planet}->to_altitude($distance);
 
-    my $orbit_p = $self->{orbit}->get_position_vector;
-    my $orbit_velo = $self->{orbit}->get_velocity_vector;
-    my $ground_velo = $self->{planet}->to_ground_velocity($orbit_p, $orbit_velo);
+    my $ground_velo = $self->{planet}->to_ground_velocity($self->{orbit}->get_position_vector, $self->{orbit}->get_velocity_vector);
     my $gv = abs($ground_velo);
 
 #    say "velo ".Dumper();
@@ -116,7 +127,7 @@ sub get_drag_force # Vector in N
                                   $self->{stage_fraction});
 
     my $v = $self->{orbit}->get_velocity_vector;
-    return - $f * $v->versor;
+    return - $f * $ground_velo->versor;
 }
 
 sub get_thrust_force # Vector in N
@@ -158,26 +169,26 @@ sub simulate
             $stage_separation = 0;
         }
 
+        $self->simulate_forward($sim_time/4);
+        $self->simulate_apply_delta_v($sim_time/2);
+        $self->simulate_forward($sim_time/2);
+        $self->simulate_apply_delta_v($sim_time/2);
+        $self->simulate_forward($sim_time/4);
 
-
-#        $self->display_vectors;
-        $self->{orbit}->forward($sim_time/2);
-#        $self->display_vectors;
-#        say Dumper $self->{orbit}->get_kepler;
-        my $deltav = $self->get_current_deltav($sim_time);
-        $self->{orbit}->apply_deltav($deltav);
-#        $self->display_vectors;
-#        say Dumper $self->{orbit}->get_kepler;
-        $self->{orbit}->forward($sim_time/2);
-#        $self->display_vectors;
-#        say "end";
-
+        if ($self->{orbit}->get_distance < $self->{planet}->radius) {
+            say "crash at $self->{time} with height ".$self->{orbit}->get_distance;
+            die;
+        } elsif ($self->{orbit}->get_distance > $self->{planet}->spere_of_influence) {
+            say "left $self->{planet}->name at $self->{time} with height ".$self->{orbit}->get_distance;
+        }
         if ($stage_separation)
         {
-            if ($self->{stage} > 0) {
-                $self->{stage}--;
+            if ($self->{current_stage} > 0) {
+                say "Stage $self->{current_stage} separation at $self->{time}";
+                $self->{current_stage}--;
                 $self->{stage_fraction} = 0;
             } else {
+                say "End of Fuel $self->{current_stage} at $self->{time}";
                 $self->{stage_fraction} = 1;
             }
         } else {
@@ -185,6 +196,32 @@ sub simulate
         }
     }
 
+}
+
+sub simulate_forward
+{
+    my $self = shift;
+    my $time = shift;
+
+    $self->{orbit}->forward($time);
+    $self->{time} += $time;
+}
+sub simulate_apply_delta_v
+{
+    my $self = shift;
+    my $time = shift;
+
+    $self->{orbit}->apply_deltav($self->get_current_deltav($time));
+}
+
+sub simulate_ticks
+{
+    my $self = shift;
+    my $ticks = shift;
+
+    foreach (1..$ticks) {
+        $self->simulate;
+    }
 }
 
 sub get_current_deltav # Vector in m/s
@@ -230,6 +267,42 @@ sub _force_2_deltav # Vector in m/s
     return $force / $mass_begin * $duration;
 }
 
+sub get_surface_twr
+{
+    my $self = shift;
+
+    my $surface_gravitation = $self->{planet}->surface_gravity;
+    my $local_gravitation = $surface_gravitation; # this is an approximation
+
+    my $mass = $self->{rocket}->get_mass($self->{current_stage}, $self->{stage_fraction});
+    my $force = $self->{rocket}->get_thrust_sum($self->{current_stage});
+    return $force / ($mass * $surface_gravitation);
+}
+
+sub get_current_twr
+{
+    my $self = shift;
+
+    my $p = $self->{orbit}->get_position_vector;
+
+    my $local_gravitation = $self->{planet}->local_gravity(abs($p));
+
+    my $mass = $self->{rocket}->get_mass($self->{current_stage}, $self->{stage_fraction});
+    my $force = $self->{rocket}->get_thrust_sum($self->{current_stage});
+
+    my $orientation_vector = $self->{orientation};
+    my $force_vector = $force * $orientation_vector->versor;
+
+    return abs($force_vector * $p->versor) / ($mass * $local_gravitation);
+}
+
+sub get_altitude
+{
+    my $self = shift;
+
+    return $self->{orbit}->get_distance - $self->{planet}->radius;
+}
+
 sub display_vectors
 {
     my $self = shift;
@@ -239,15 +312,20 @@ sub display_vectors
 
     my $long = atan2($p->[1], $p->[0]);
 
-    say sprintf(' [%+.5E %+.5E %+.5E] [%+.5E %+.5E %+.5E] %+.5E %+.5E %+.5E %+.5E %+.5E %e %+f',
+    say sprintf(' [%+.1f %+.1f %+.1f] %.1f [%+.2f %+.2f %+.2f] %.2f APO %+.5E PER %+.5E ECC %.6f RemST %.3f TWR %f CTWR %f Long %+f',
                 $p->[0], $p->[1], $p->[2],
+                abs($p),
                 $v->[0], $v->[1], $v->[2],
-                abs($p), abs($v),
+                abs($v),
                 $self->{orbit}->get_kepler->get_apoapsis,
+                $self->{orbit}->get_kepler->get_periapsis,
                 $self->{orbit}->get_kepler->{eccentricity},
-                $self->{orbit}->get_kepler->get_true_anomaly,
+                #$self->{orbit}->get_kepler->get_true_anomaly,
                 $self->get_remaining_stagetime,
-                $long / PI * 180);
+                $self->get_surface_twr,
+                $self->get_current_twr,
+                $long / pi * 180);
+#    say Dumper [$self->{simulation_timepiece}/2, $self->get_current_forces($self->{simulation_timepiece}/2)];
 }
 
 1;

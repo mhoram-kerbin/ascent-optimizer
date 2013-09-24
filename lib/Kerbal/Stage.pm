@@ -105,4 +105,18 @@ sub get_sum_of_specific_impulses
     return $isp;
 }
 
+sub get_content
+{
+    my $self = shift;
+
+    my $c = '';
+    foreach (0..$self->{number}-1) {
+        my $component = $self->{component}->[$_];
+        my $c_mass = $component->get_mass;
+        $c .= ' Component '.($_+1)." ($c_mass kg) ($self->{symmetry}->[$_] x Symmetry)\n";
+        $c .= $component->get_content;
+    }
+    return $c;
+}
+
 1;

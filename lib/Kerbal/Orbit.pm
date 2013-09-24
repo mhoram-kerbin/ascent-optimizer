@@ -5,11 +5,8 @@ use feature qw(say);
 
 use Data::Dumper;
 
-use Kerbal::Constants;
 use Kerbal::Orbit::Cartesian;
 use Kerbal::Orbit::Kepler;
-use Kerbal::Physics;
-use Kerbal::Planetary;
 
 use constant {
     K => 'kepler',
@@ -51,10 +48,23 @@ sub cartesian
 
     my $self = {
         kepler => undef,
-        primary => K,
+        primary => C,
         cartesian => $c,
     };
     return bless $self, $class;
+}
+
+sub clone
+{
+    my $self = shift;
+
+    my $new;
+    if ($self->{primary} eq K) {
+        $new = Kerbal::Orbit->kepler($self->{kepler}->clone);
+    } else {
+        $new = Kerbal::Orbit->cartesian($self->{cartesian}->clone);
+    }
+    return $new;
 }
 
 sub get_kepler
