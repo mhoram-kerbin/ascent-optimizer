@@ -3,6 +3,7 @@ package Kerbal::Orbit::Cartesian;
 use strict;
 use feature qw(say);
 use Data::Dumper;
+use Carp;
 
 use Math::Trig qw(acos_real :pi);
 use Math::Vector::Real;
@@ -323,7 +324,7 @@ sub _calculate_eccentric_anomaly
     my $e = $self->get_eccentricity;
 
     if ($e >= 1) {
-        die ("no more elipsis $e");
+        confess ("no more elipsis $e");
     }
 
 #    say "X $e $theta_cos ". (1 + $e * $theta_cos);
@@ -444,6 +445,26 @@ sub get_prograde
     my $self = shift;
 
     return $self->{v}->versor;
+}
+
+sub get_periapsis
+{
+    my $self = shift;
+
+    my $sm = $self->get_semi_major;
+    my $ecc = $self->get_eccentricity;
+
+    return $sm * (1 - $ecc);
+}
+
+sub get_apoapsis
+{
+    my $self = shift;
+
+    my $sm = $self->get_semi_major;
+    my $ecc = $self->get_eccentricity;
+
+    return $sm * (1 + $ecc);
 }
 
 1;

@@ -163,7 +163,7 @@ sub sidereal_velocity
 
 }
 
-sub get_terminal_velocity # this is KSP specific
+sub get_terminal_velocity # in m/s this is KSP specific
 {
     my $self = shift;
     my $distance = shift;

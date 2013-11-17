@@ -41,17 +41,17 @@ sub cartesian
     my $class = shift;
     my $args = shift;
 
-    my $c = Kerbal::Orbit::Cartesian->new;
+    my $c :shared = Kerbal::Orbit::Cartesian->new;
     $c->set_gravitational_parameter($args->{gravitational_parameter});
     $c->set_p($args->{p});
     $c->set_v($args->{v});
 
-    my $self = {
+    my %self :shared = (
         kepler => undef,
         primary => C,
         cartesian => $c,
-    };
-    return bless $self, $class;
+    );
+    return bless \%self, $class;
 }
 
 sub clone
@@ -164,6 +164,14 @@ sub forward_old
 
     $k->forward($time);
 
+}
+
+
+sub get_mean_anomaly
+{
+    my $self = shift;
+
+    return $self->get_cartesian->get_mean_anomaly;
 }
 
 sub get_time_to_apoapsis

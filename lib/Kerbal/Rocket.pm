@@ -145,7 +145,7 @@ sub get_average_specific_impulse # in sec
     return $self->{asi}->[$stage]->{$pressure};
 }
 
-sub get_fuel_consumption # in kg / sec
+sub get_fuel_consumption # in kg / s
 {
     my $self = shift;
     my $stage = shift;
@@ -168,7 +168,7 @@ sub get_stage_time # in sec
     return $fuel / $cons;
 }
 
-sub get_stage_delta_v
+sub get_remaining_stage_delta_v
 {
     my $self = shift;
     my $stage = shift;
@@ -195,10 +195,10 @@ sub get_accumulated_delta_v
     my $timefraction = shift;
     my $pressure = shift;
 
-    my $deltav = $self->get_stage_delta_v($stage, $timefraction, $pressure);
+    my $deltav = $self->get_remaining_stage_delta_v($stage, $timefraction, $pressure);
 
     foreach (0..$stage-1) {
-        $deltav += $self->get_stage_delta_v($_, 0, $pressure);
+        $deltav += $self->get_remaining_stage_delta_v($_, 0, $pressure);
     }
 
     return $deltav;
@@ -248,16 +248,36 @@ sub get_time_for_deltav
     my $expanded_deltav = 0;
 
     while($deltav > $expanded_deltav and $stage >= 0) {
-        my $remaining_stage_deltav = $self->get_stage_delta_v($stage, $fraction, $pressure);
+        my $remaining_stage_deltav = $self->get_remaining_stage_delta_v($stage, $fraction, $pressure);
         my $remaining_stage_time = $self->get_stage_time($stage, $pressure) * (1 - $fraction);
-        if ($remaining_stage_deltav + $expanded_deltav > $deltav) {
-            my $deltav_per_second = $remaining_stage_deltav / $remaining_stage_time;
-            my $needed = $deltav - $expanded_deltav;
-            my $finalization_time = $needed / $deltav_per_second;
+        if ($remaining_stage_deltav + $expanded_deltav > $deltav) { # last_stage
+
+            my $needed_deltav = $deltav - $expanded_deltav;
+
+            my $m0 = $self->get_remaining_mass($stage, $fraction);
+            my $a = $self->get_fuel_consumption($stage, $pressure); # in kg/s
+            my $thrust = $self->get_thrust_sum($stage);
+
+            my $finalization_time = ($m0 - exp(-$a * $needed_deltav / $thrust + log($m0))) / $a;
+
+#            dv = T * int 1/m(t) dt;
+#            m(t) = m0 - a*t;
+#            dv = T * int 1/m0-a*t dt;
+#            dv = T * (ln(t1) - ln(t0));
+#
+#            int 1/(m0-at) dt = 1/-a * ln(-at+b) + C;
+#
+#            int_t0^t1 1/(m0-at) = 1/-a * (ln(-at1 + m0) - ln(-at0 + m0));
+#
+#            dv/T = 1/-a * (ln(-at1 + m0) - ln(-at0 + m0));
+#
+#            -a * dv/T + ln(-at0 + m0) = ln (-at1 + m0);
+#
+#            (m0 - e^(-a * dv/T + ln(-at0 + m0))) / a = t1
 
             $time += $finalization_time;
-            $expanded_deltav += $deltav_per_second * $finalization_time;
-        } else {
+            $expanded_deltav += $needed_deltav;
+        } else { # not last stage
             $time += $remaining_stage_time;
             $expanded_deltav += $remaining_stage_deltav;
         }

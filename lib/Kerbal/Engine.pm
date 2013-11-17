@@ -13,6 +13,14 @@ use constant {
             mass => 1500, # in kg
             drag => 0.2, # dimensionless
         },
+        'LV-T30' => {
+            name => 'LV-T30 Liquid Fuel Engine',
+            thrust => 215,
+            isp_1atm => 320,
+            isp_vac => 370,
+            mass => 1250,
+            drag => 0.2,
+        },
         'LV-T45' => {
             name => 'LV-T45 Liquid Fuel Engine',
             thrust => 200,
