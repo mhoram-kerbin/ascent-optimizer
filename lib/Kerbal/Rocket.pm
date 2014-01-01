@@ -168,7 +168,7 @@ sub get_stage_time # in sec
     return $fuel / $cons;
 }
 
-sub get_remaining_stage_delta_v
+sub get_remaining_stage_delta_v # in m / s
 {
     my $self = shift;
     my $stage = shift;
@@ -188,7 +188,7 @@ sub get_remaining_stage_delta_v
     return $deltav;
 }
 
-sub get_accumulated_delta_v
+sub get_accumulated_delta_v # in m / s
 {
     my $self = shift;
     my $stage = shift;
@@ -236,12 +236,12 @@ sub get_content
     return $res;
 }
 
-sub get_time_for_deltav
+sub get_time_for_deltav # in sec
 {
     my $self = shift;
-    my $deltav = shift;
-    my $stage = shift;
-    my $fraction = shift;
+    my $deltav = shift; # in m / sec
+    my $stage = shift; # dimensionless
+    my $fraction = shift; # dimensionless
     my $pressure = shift;
 
     my $time = 0;

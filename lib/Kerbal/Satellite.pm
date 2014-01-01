@@ -159,7 +159,7 @@ sub get_drag_force # Vector in N
 
 #    say "velo ".Dumper();
 
-    my $f = 0.5 *
+    my $f = - 0.5 *
         $self->{planet}->density($altitude) *
         $gv ** 2 *
         $self->{rocket}->get_drag_coefficient($self->{current_stage},
@@ -167,8 +167,7 @@ sub get_drag_force # Vector in N
         $self->{rocket}->get_area($self->{current_stage},
                                   $self->{stage_fraction});
 
-    my $v = $self->{orbit}->get_velocity_vector;
-    return - $f * $ground_velo->versor;
+    return $f * $ground_velo->versor;
 #    if (abs($ground_velo) > 0) {
 #        return - $f * $ground_velo->versor;
 #    } else {
