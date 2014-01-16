@@ -4,7 +4,7 @@ use strict;
 
 use constant {
     CONVERSION_FACTOR => 1.2230948554874, # in kg m^-3 atm^-1
-    GRAVITATIONAL_CONSTANT => 6.674E-11,
+    GRAVITATIONAL_CONSTANT => 6.674E-11, # in N m kg^-2
 };
 
 use Math::Trig ':pi';
