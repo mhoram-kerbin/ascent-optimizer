@@ -4,7 +4,7 @@ use strict;
 
 use constant {
     CONVERSION_FACTOR => 1.2230948554874, # in kg m^-3 atm^-1
-    GRAVITATIONAL_CONSTANT => 6.674E-11, # in N m kg^-2
+    GRAVITATIONAL_CONSTANT => 6.674E-11, # in N m^2 kg^-2
 };
 
 use Math::Trig ':pi';
@@ -47,6 +47,24 @@ sub kerbin
     return bless $self, $class;
 }
 
+sub mun
+{
+    my $class = shift;
+
+    my $self = {
+        name => 'Mun',
+        mass => 9.7600236E20,
+        radius => 200000,
+        scale_height => 1,
+        atmospheric_height => 1,
+        density_at_sealevel => 1,
+        rotation_period => 138984.38,
+        spere_of_influence => 2429559.1,
+
+    };
+    return bless $self, $class;
+}
+
 sub eve
 {
     my $class = shift;
@@ -60,6 +78,23 @@ sub eve
         density_at_sealevel => 5,
         rotation_period => 80500,
         spere_of_influence => 85109365,
+    };
+    return bless $self, $class;
+}
+
+sub kerbol
+{
+    my $class = shift;
+
+    my $self = {
+        name => 'Kerbol',
+        mass => 1.7565670E28,
+        radius => 261600000,
+        scale_height => 0,
+        atmospheric_height => 0,
+        density_at_sealevel => 0,
+        rotation_period => 432000,
+        spere_of_influence => 1e100,
     };
     return bless $self, $class;
 }
@@ -205,12 +240,14 @@ sub local_gravity
     return GRAVITATIONAL_CONSTANT * $self->{mass} / $distance ** 2;
 }
 
+sub get_mu { return shift->get_gravitational_parameter(@_); }
 sub get_gravitational_parameter
 {
     my $self = shift;
 
     return GRAVITATIONAL_CONSTANT * $self->{mass};
 }
+
 
 sub get_rotation
 {

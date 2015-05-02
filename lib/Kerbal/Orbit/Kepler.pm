@@ -61,6 +61,16 @@ sub set_eccentricity
     $self->_delete_cache;
 }
 
+sub set_apsides
+{
+    my $self = shift;
+    my $apo = shift;
+    my $peri = shift;
+
+    $self->{semi_major} = ($apo + $peri) / 2;
+    $self->{eccentricity} = 1 - $peri / $self->{semi_major};
+}
+
 sub set_inclination {
     my $self = shift;
     $self->{inclination} = shift;
@@ -120,20 +130,20 @@ sub _calculate_eccentric_anomaly
 
     my $i = 0; # iteration counter
 
-    my $e = $ecc > 0.8 ? pi : $mean; # starting value for approximation
+    my $target = $ecc > 0.8 ? pi : $mean; # starting value for approximation
     my $prev;
-    my $temp = $e - $ecc * sin($e) - $mean;
-    while (abs($temp) > $self->{approximation_error}) {
-        $prev = $e;
-        $e = $prev - $temp / (1 - $ecc * cos($prev));
-        $temp = $e - $ecc * sin($e) - $mean;
+    my $error = $target - $ecc * sin($target) - $mean;
+    while (abs($error) > $self->{approximation_error}) {
+        $prev = $target;
+        $target = $prev - $error / (1 - $ecc * cos($prev));
+        $error = $target - $ecc * sin($target) - $mean;
         $i++;
         if ($i > 100) {
             die ('no approximation found after 100 steps'.Dumper($self));
         }
     }
 #    say "i = $i";
-    $self->{_cache}->{eccentric_anomaly} = $e;
+    $self->{_cache}->{eccentric_anomaly} = $target;
 }
 
 sub get_true_anomaly
@@ -266,11 +276,11 @@ sub forward
     $self->_delete_cache;
 }
 
-sub get_duration
+sub get_sidereal_period
 {
     my $self = shift;
 
-#    say $self->{semi_major}."sm";
+    say $self->{semi_major}."sm";
     return 2 * pi * sqrt($self->{semi_major} ** 3 / $self->{gravitational_parameter});
 }
 

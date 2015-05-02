@@ -19,8 +19,12 @@ sub kepler
     my $args = shift;
 
     my $k = Kerbal::Orbit::Kepler->new;
-    $k->set_eccentricity($args->{eccentricity});
-    $k->set_semi_major($args->{semi_major});
+    if (exists $args->{eccentricity}) {
+        $k->set_eccentricity($args->{eccentricity});
+        $k->set_semi_major($args->{semi_major});
+    } else {
+        $k->set_apsides($args->{apoapsis}, $args->{periapsis});
+    }
     $k->set_inclination($args->{inclination});
     $k->set_ascending_node_longitude($args->{ascending_node_longitude});
     $k->set_argument_of_periapsis($args->{argument_of_periapsis});
